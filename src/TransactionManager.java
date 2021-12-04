@@ -17,23 +17,18 @@ public class TransactionManager {
         this.transactionBirthTime = new HashMap<Integer, Integer>();
     }
 
-    public void addTransaction( int transactionId, int dataIndex, int requestDataValueChangeTo, String requestType, int timeStamp ) {
+    public void createTransaction( int transactionId, int timeStamp ) {
+        this.transactionMap.put( transactionId, new Transaction( transactionId ) );
+        this.transactionBirthTime.put( transactionId, timeStamp );
+    }
+
+    public void addSubTransaction( int transactionId, int dataIndex, int requestDataValueChangeTo, String requestType, int timeStamp ) {
         if( requestType.equals( "W" ) ) {
-            if( !transactionMap.containsKey( transactionId ) ) {
-                transactionMap.put( transactionId, new Transaction() );
-            }
             transactionMap.get( transactionId ).addWriteSubTransaction( transactionId, dataIndex, requestDataValueChangeTo, requestType );
         }
         // Read or Read Only
         else {
-            if( !transactionMap.containsKey( transactionId ) ) {
-                transactionMap.put( transactionId, new Transaction() );
-            }
             transactionMap.get( transactionId ).addReadSubTransaction( transactionId, dataIndex, requestType );
-        }
-        // Set birth time, used when killing the youngest
-        if( !transactionBirthTime.containsKey( transactionId ) ) {
-            transactionBirthTime.put( transactionId, timeStamp );
         }
 
         // to do: add to active queue or waiting queue

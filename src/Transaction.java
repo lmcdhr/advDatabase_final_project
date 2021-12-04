@@ -3,9 +3,11 @@ import java.util.HashSet;
 
 public class Transaction {
 
+    public int transactionId;
     public Set<SubTransaction> subTransactionSet;
 
-    public Transaction() {
+    public Transaction( int transactionId ) {
+        this.transactionId = transactionId;
         this.subTransactionSet = new HashSet<SubTransaction>();
     }
 
