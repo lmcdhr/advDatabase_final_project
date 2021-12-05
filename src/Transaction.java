@@ -9,8 +9,6 @@ public class Transaction {
     // store write result, key: site id
     // value: List of int[] where int[0] is data id, int[1] is new value
     Map<Integer, List<int[]>> writeCache;
-    // store read result, key: data id, value: data value
-    Map<Integer, Integer> readCache;
 
     // this is no longer needed since we do not need to store subtransactions in transaction
     //public Set<SubTransaction> subTransactionSet;
@@ -22,7 +20,6 @@ public class Transaction {
         //this.subTransactionSet = new HashSet<SubTransaction>();
         this.visitedSet = new HashSet<Integer>();
         this.writeCache = new HashMap<Integer, List<int[]>>();
-        this.readCache = new HashMap<Integer, Integer>();
     }
 
 //    public void addReadSubTransaction( int transactionId, int requestDataIndex, String requestType ) {

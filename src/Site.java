@@ -76,6 +76,17 @@ public class Site {
         this.lockMap.get( dataIndex ).get( lockType ).remove( transactionId );
     }
 
+    public boolean canAcquireReadLock( int dataIndex, int transactionId ) {
+        Map<Integer, Set<Integer>> dataLockMap = lockMap.get( dataIndex );
+        Set<Integer> writeLock = dataLockMap.get( 2 );
+        for( int tId: writeLock ) {
+            if( tId != transactionId ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void eraseAllLock() {
         for( int i=2; i<=20; i+=2 ) {
             Map<Integer, Set<Integer>> dataLockMap = new HashMap<>();
@@ -126,8 +137,9 @@ public class Site {
         }
     }
 
-    public boolean checkAvailableTimeForRO( int ROTime ) {
-        int prevUpTime = statusUpTime.floorKey( ROTime );
+    public boolean checkAvailableTimeForRO( int dataId, int ROTime ) {
+        int prevCommitTime = dataMap.get( dataId ).valueRecord.lastKey();
+        int prevUpTime = statusUpTime.floorKey( prevCommitTime );
         int prevUpEndTime = statusUpTime.get( prevUpTime );
         if( prevUpEndTime < ROTime ) {
             return false;

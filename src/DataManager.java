@@ -38,6 +38,10 @@ public class DataManager {
         }
     }
 
+    public void implementReadLockOnSite( int siteId, int dataId, int transactionId ) {
+        siteMap.get( siteId ).lockMap.get( dataId ).get( 1 ).add( transactionId );
+    }
+
     public void dump() {
         for( int i=1; i<=10; i++ ) {
             Site s = siteMap.get( i );
