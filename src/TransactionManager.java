@@ -42,14 +42,73 @@ public class TransactionManager {
     }
 
     public boolean runEndSubTransaction( SubTransaction subTransaction ) {
+        int targetTransactionId = subTransaction.transactionId;
+        Transaction targetTransaction = transactionMap.get( targetTransactionId );
+
+        if( targetTransaction.isAborted ) {
+            System.out.println( "transaction: " + targetTransactionId + " was aborted " );
+            transactionMap.remove( targetTransactionId );
+            return false;
+        }
+
+        // commit write changes and output write result
+        for( int siteId: targetTransaction.writeCache.keySet() ) {
+            Site site = dm.siteMap.get( siteId );
+            for( int[] data: targetTransaction.writeCache.get( siteId ) ) {
+                int dataId = data[0];
+                int value = data[1];
+                dm.write( siteId, dataId, value, subTransaction.timeStamp );
+            }
+        }
+        // remove all blocked subtransactions in waiting queue
+        Iterator<SubTransaction> subTransactionIterator = waitingTransactions.iterator();
+        while( subTransactionIterator.hasNext() ) {
+            SubTransaction st = subTransactionIterator.next();
+            if( st.transactionId == targetTransactionId ) {
+                subTransactionIterator.remove();
+            }
+        }
+
+        // output read result
+        for( int dataId: targetTransaction.readCache.keySet() ) {
+            System.out.println( "read x" + dataId + ":" + targetTransaction.readCache.get( dataId ) );
+        }
+
+        dm.removeLockForTransaction( targetTransactionId );
+        transactionMap.remove( targetTransactionId );
         return false;
     }
 
     public boolean runFailSubTransaction( SubTransaction subTransaction ) {
+        int siteId = subTransaction.siteId;
+        dm.siteMap.get( siteId ).fail( subTransaction.timeStamp );
+        for( int transactionId: transactionMap.keySet() ) {
+            if( transactionMap.get( transactionId ).visitedSet.contains( siteId ) ) {
+                transactionMap.get( transactionId ).isAborted = true;
+                // remove all active and blocked subtransactions in waiting queue
+                Iterator<SubTransaction> subTransactionIterator = waitingTransactions.iterator();
+                while( subTransactionIterator.hasNext() ) {
+                    SubTransaction st = subTransactionIterator.next();
+                    if( st.transactionId == transactionId ) {
+                        subTransactionIterator.remove();
+                    }
+                }
+                subTransactionIterator = activeTransactions.iterator();
+                while( subTransactionIterator.hasNext() ) {
+                    SubTransaction st = subTransactionIterator.next();
+                    if( st.transactionId == transactionId ) {
+                        subTransactionIterator.remove();
+                    }
+                }
+                dm.removeLockForTransaction( transactionId );
+            }
+        }
         return false;
     }
 
     public boolean runRecoverSubTransaction( SubTransaction subTransaction ) {
+        int siteId = subTransaction.siteId;
+        dm.siteMap.get( siteId ).recover( subTransaction.timeStamp );
         return false;
     }
 
