@@ -1,7 +1,4 @@
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Site {
 
@@ -15,17 +12,22 @@ public class Site {
     // inside the set is the id of transactions that asked(already holds) for such lock
     public Map<Integer, Map<Integer, Set<Integer>>> lockMap;
 
+    // this map will save the time interval when site is up
+    // key is the start time, value is the end time
+    public TreeMap<Integer, Integer> statusUpTime;
+
     public Site( int siteId ) {
         this.siteId = siteId;
         this.isStatusUp = true;
         this.dataMap = new HashMap<Integer, Data>();
         this.lockMap = new HashMap<>();
         this.generateData();
+        this.statusUpTime.put( 0, Integer.MAX_VALUE );
     }
 
     private void generateData() {
         for( int i=2; i<=20; i+=2 ) {
-            Data data = new Data( i, i * 10 );
+            Data data = new Data( i, i * 10, 0 );
             dataMap.put( i, data );
             Map<Integer, Set<Integer>> dataLockMap = new HashMap<>();
             for( int j=1; j<=2; j++ ) {
@@ -35,7 +37,7 @@ public class Site {
         }
         if( ( this.siteId - 1 ) % 2 != 0 ) {
             int index = this.siteId - 1;
-            Data firstData = new Data( index, index * 10 );
+            Data firstData = new Data( index, index * 10, 0 );
             dataMap.put( index, firstData );
             Map<Integer, Set<Integer>> dataLockMap = new HashMap<>();
             for( int j=1; j<=2; j++ ) {
@@ -43,7 +45,7 @@ public class Site {
             }
             lockMap.put( index, dataLockMap );
             index += 10;
-            Data secondData = new Data( index, index * 10 );
+            Data secondData = new Data( index, index * 10, 0 );
             dataLockMap = new HashMap<>();
             for( int j=1; j<=2; j++ ) {
                 dataLockMap.put( j, new HashSet<Integer>() );
@@ -53,14 +55,17 @@ public class Site {
         }
     }
 
-    public void fail() {
+    public void fail( int timeStamp ) {
         this.isStatusUp = false;
         this.eraseAllLock();
+        int prevUpTime = statusUpTime.floorKey( timeStamp );
+        statusUpTime.put( prevUpTime, timeStamp );
     }
 
-    public void recover() {
+    public void recover( int timeStamp ) {
         this.isStatusUp = true;
         this.setDataStatusAfterRecover();
+        statusUpTime.put( timeStamp, Integer.MAX_VALUE );
     }
 
     public void applyLock( int dataIndex, int lockType, int transactionId ) {
@@ -100,6 +105,35 @@ public class Site {
             Data prevData = dataMap.get( i );
             prevData.canBeRead = false;
             dataMap.put( i, prevData );
+        }
+    }
+
+    public void writeValueToData( int dataId, int dataValue, int timeStamp ) {
+        dataMap.get( dataId ).valueRecord.put( timeStamp, dataValue );
+        dataMap.get( dataId ).updateValue();
+        System.out.println( "write to site: " + siteId + " data: " + dataId + " with value: " + dataValue + " at time: " + timeStamp );
+    }
+
+    public void removeLockFromTransaction( int transactionId ) {
+        for( int dataId: lockMap.keySet() ) {
+            Map<Integer, Set<Integer>> dataLocks = lockMap.get( dataId );
+            for( int lockType: dataLocks.keySet() ) {
+                if( dataLocks.get( lockType ).contains( transactionId ) ) {
+                    dataLocks.get( lockType ).remove( transactionId );
+                }
+            }
+            lockMap.put( dataId, dataLocks );
+        }
+    }
+
+    public boolean checkAvailableTimeForRO( int ROTime ) {
+        int prevUpTime = statusUpTime.floorKey( ROTime );
+        int prevUpEndTime = statusUpTime.get( prevUpTime );
+        if( prevUpEndTime < ROTime ) {
+            return false;
+        }
+        else {
+            return true;
         }
     }
 
