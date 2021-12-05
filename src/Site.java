@@ -55,10 +55,12 @@ public class Site {
 
     public void fail() {
         this.isStatusUp = false;
+        this.eraseAllLock();
     }
 
     public void recover() {
         this.isStatusUp = true;
+        this.setDataStatusAfterRecover();
     }
 
     public void applyLock( int dataIndex, int lockType, int transactionId ) {
@@ -69,12 +71,44 @@ public class Site {
         this.lockMap.get( dataIndex ).get( lockType ).remove( transactionId );
     }
 
-    public void printTest() {
-        System.out.println( "site: " + this.siteId + " is up? " + this.isStatusUp );
+    public void eraseAllLock() {
+        for( int i=2; i<=20; i+=2 ) {
+            Map<Integer, Set<Integer>> dataLockMap = new HashMap<>();
+            for( int j=1; j<=2; j++ ) {
+                dataLockMap.put( j, new HashSet<Integer>() );
+            }
+            lockMap.put( i, dataLockMap ); // 0 means no lock
+        }
+        if( ( this.siteId - 1 ) % 2 != 0 ) {
+            int index = this.siteId - 1;
+            Map<Integer, Set<Integer>> dataLockMap = new HashMap<>();
+            for( int j=1; j<=2; j++ ) {
+                dataLockMap.put( j, new HashSet<Integer>() );
+            }
+            lockMap.put( index, dataLockMap );
+            index += 10;
+            dataLockMap = new HashMap<>();
+            for( int j=1; j<=2; j++ ) {
+                dataLockMap.put( j, new HashSet<Integer>() );
+            }
+            lockMap.put( index, dataLockMap );
+        }
+    }
+
+    public void setDataStatusAfterRecover() {
+        for( int i=2; i<=20; i+=2 ) {
+            Data prevData = dataMap.get( i );
+            prevData.canBeRead = false;
+            dataMap.put( i, prevData );
+        }
+    }
+
+    public void print() {
+        System.out.print( "site" + this.siteId + " : "  );
         for( int i=1; i<=20; i++ ) {
             if( this.dataMap.containsKey( i ) ) {
                 Data d = this.dataMap.get( i );
-                System.out.println( "data: " + d.dataIndex  + " : " + d.dataValue );
+                System.out.print( "x" + d.dataIndex  + ":" + d.dataValue + " " );
             }
         }
     }

@@ -27,10 +27,11 @@ public class DataManager {
         site.recover();
     }
 
-    public void printTest() {
+    public void dump() {
         for( int i=1; i<=10; i++ ) {
             Site s = siteMap.get( i );
-            s.printTest();
+            s.print();
+            System.out.println();
         }
     }
 }

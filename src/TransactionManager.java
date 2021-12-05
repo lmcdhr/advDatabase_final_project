@@ -1,37 +1,56 @@
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 public class TransactionManager {
 
-    Queue<SubTransaction> activeTransactions;
-    Queue<SubTransaction> waitingTransactions;
+    List<SubTransaction> activeTransactions;
+    List<SubTransaction> waitingTransactions;
     Map<Integer, Transaction> transactionMap;
-    Map<Integer, Integer> transactionBirthTime;
+    DataManager dm;
 
     public TransactionManager() {
-        this.activeTransactions = new LinkedList<SubTransaction>();
-        this.waitingTransactions = new LinkedList<SubTransaction>();
+        this.activeTransactions = new ArrayList<SubTransaction>();
+        this.waitingTransactions = new ArrayList<SubTransaction>();
         this.transactionMap = new HashMap<Integer, Transaction>();
-        this.transactionBirthTime = new HashMap<Integer, Integer>();
+        this.dm = new DataManager();
     }
 
     public void createTransaction( int transactionId, int timeStamp ) {
-        this.transactionMap.put( transactionId, new Transaction( transactionId ) );
-        this.transactionBirthTime.put( transactionId, timeStamp );
+        this.transactionMap.put( transactionId, new Transaction( transactionId, timeStamp ) );
     }
 
-    public void addSubTransaction( int transactionId, int dataIndex, int requestDataValueChangeTo, String requestType, int timeStamp ) {
-        if( requestType.equals( "W" ) ) {
-            transactionMap.get( transactionId ).addWriteSubTransaction( transactionId, dataIndex, requestDataValueChangeTo, requestType );
-        }
-        // Read or Read Only
-        else {
-            transactionMap.get( transactionId ).addReadSubTransaction( transactionId, dataIndex, requestType );
-        }
+    // here we get the next subtransaction and run it.
+    public void executeNextSubTransaction() {
 
-        // to do: add to active queue or waiting queue
+    }
+
+    // all the run methods will return if there is release of locks.
+    // this will be used to judge if we will pick the next subtransaction from wait queue or reading from file
+    public boolean runReadSubTransaction( SubTransaction subTransaction ) {
+        return false;
+    }
+
+    public boolean runROSubTransaction( SubTransaction subTransaction ) {
+        return false;
+    }
+
+    public boolean runWriteSubTransaction( SubTransaction subTransaction ) {
+        return false;
+    }
+
+    public boolean runBeginSubTransaction( SubTransaction subTransaction ) {
+        return false;
+    }
+
+    public boolean runEndSubTransaction( SubTransaction subTransaction ) {
+        return false;
+    }
+
+    public boolean runFailSubTransaction( SubTransaction subTransaction ) {
+        return false;
+    }
+
+    public boolean runRecoverSubTransaction( SubTransaction subTransaction ) {
+        return false;
     }
 
 }
