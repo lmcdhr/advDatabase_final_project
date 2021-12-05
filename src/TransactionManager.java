@@ -14,10 +14,6 @@ public class TransactionManager {
         this.dm = new DataManager();
     }
 
-    public void createTransaction( int transactionId, int timeStamp ) {
-        this.transactionMap.put( transactionId, new Transaction( transactionId, timeStamp ) );
-    }
-
     // here we get the next subtransaction and run it.
     public void executeNextSubTransaction() {
 
@@ -38,6 +34,10 @@ public class TransactionManager {
     }
 
     public boolean runBeginSubTransaction( SubTransaction subTransaction ) {
+        if (!transactionMap.containsKey(subTransaction.transactionId)) {
+            transactionMap.put(subTransaction.transactionId,
+                    new Transaction(subTransaction.transactionId, subTransaction.timeStamp));
+        }
         return false;
     }
 
