@@ -23,53 +23,44 @@ public class TransactionManager {
         try {
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             String query; // query read from input file
-
+            int timestamp = 0; // line number for query in input file
             while (true) {
                 // if exists, idx 0 represents request type or dump, idx 1 represents transaction ID or site ID,
                 // idx 2 represents data ID, idx 3 represents data value
                 String[] tokens = null;
-
+                SubTransaction subtransaction = null;
                 // firstly we check if there is remaining sub-transactions in activeTransactions
                 if (!activeTransactions.isEmpty()){
-                    SubTransaction subtransaction = activeTransactions.get(0);
-                    switch (subtransaction.requestType) {
-                        case "begin":
-                            //runBeginSubTransaction(subtransaction);
-                            break;
-                        case "R": // TODO: Distinguish R and RO here based on begin or beginRO
-                            //runReadSubTransaction(subtransaction);
-                            break;
-                        case "RO":
-                            //runROSubTransaction(subtransaction);
-                            break;
-                        case "W":
-                            //runWriteSubTransaction(subtransaction);
-                            break;
-                        case "end":
-                            //runEndSubTransaction(subtransaction);
-                            break;
-                        case "fail":
-                            //runFailSubTransaction(subtransaction);
-                            break;
-                        case "recover":
-                            //runRecoverSubTransaction(subtransaction);
-                            break;
-                        default: System.out.println("invalid input query format");
-                    }
+                    subtransaction = activeTransactions.get(0);
+
                 } else {
                     // read from file
                     if ((query = br.readLine()) != null){
                         System.out.println("instruction is: " + query);
+                        timestamp++;
+                        System.out.println("timestamp is: " + timestamp);
                         Parser parser = new Parser();
                         tokens = parser.parse(query);
-
-//
+                        if ("begin".equals(tokens[0]) || "end".equals(tokens[0])){
+                            subtransaction = new SubTransaction(Integer.parseInt(tokens[1]), tokens[0], timestamp);
+                        }
+                        else if ("fail".equals(tokens[0]) || "recover".equals(tokens[0])){
+                            subtransaction = new SubTransaction(tokens[0], Integer.parseInt(tokens[1]), timestamp);
+                        }
+                        else if ("R".equals(tokens[0])){
+                            subtransaction = new SubTransaction(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), tokens[0], timestamp);
+                        }
+                        else if ("W".equals(tokens[0])){
+                            subtransaction = new SubTransaction(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]), tokens[0], timestamp);
+                        }
                     }
                     else {
                         System.out.println("Finish reading input file");
                         break;
                     }
                 }
+                assert subtransaction != null;
+                //executeSubTransaction(subtransaction);
             }
         } catch (FileNotFoundException e) {
             System.out.println("Problem reading the input file");
@@ -80,8 +71,40 @@ public class TransactionManager {
     }
 
     // here we get the next sub-transaction and run it.
-    public void executeNextSubTransaction() {
-
+    public boolean executeSubTransaction(SubTransaction subtransaction) {
+        switch (subtransaction.requestType) {
+            case "begin":
+                return runBeginSubTransaction(subtransaction);
+            case "R": // TODO: Distinguish R and RO here based on begin or beginRO
+                return runReadSubTransaction(subtransaction);
+            case "W":
+                return runWriteSubTransaction(subtransaction);
+            case "end":
+                return runEndSubTransaction(subtransaction);
+            case "fail":
+                return runFailSubTransaction(subtransaction);
+            case "recover":
+                runRecoverSubTransaction(subtransaction);
+        }
+        if (subtransaction.requestType.equals("begin")){
+            return runBeginSubTransaction(subtransaction);
+        }
+        else if (subtransaction.requestType.equals("R")){
+            return runReadSubTransaction(subtransaction);
+        }
+        else if (subtransaction.requestType.equals("W")){
+            return runWriteSubTransaction(subtransaction);
+        }
+        else if (subtransaction.requestType.equals("end")){
+            return runEndSubTransaction(subtransaction);
+        }
+        else if (subtransaction.requestType.equals("fail")){
+            return runFailSubTransaction(subtransaction);
+        }
+        else if (subtransaction.requestType.equals("recover")){
+            runRecoverSubTransaction(subtransaction);
+        }
+        // return false;
     }
 
     // all the run methods will return if there is release of locks.

@@ -18,8 +18,8 @@ public class SubTransaction {
     }
 
     // used for fail and recover
-    public SubTransaction( int transactionId, String requestType, int siteId, int timeStamp ) {
-        this.transactionId = transactionId;
+    public SubTransaction( String requestType, int siteId, int timeStamp ) {
+        this.transactionId = -1;
         this.siteId = siteId;
         this.requestType = requestType;
         this.requestDataIndex = -1;
