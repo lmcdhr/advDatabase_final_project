@@ -8,12 +8,14 @@ public class TransactionManager {
 
     List<SubTransaction> activeTransactions;
     List<SubTransaction> waitingTransactions;
+    List<SubTransaction> waitingReadingTransactionsDueToUnavailableSite;
     Map<Integer, Transaction> transactionMap;
     DataManager dm;
 
     public TransactionManager() {
         this.activeTransactions = new ArrayList<SubTransaction>();
         this.waitingTransactions = new ArrayList<SubTransaction>();
+        this.waitingReadingTransactionsDueToUnavailableSite = new ArrayList<SubTransaction>();
         this.transactionMap = new HashMap<Integer, Transaction>();
         this.dm = new DataManager();
     }
@@ -78,6 +80,7 @@ public class TransactionManager {
             return runBeginSubTransaction(subtransaction, true);
         }
         else if (subtransaction.requestType.equals("R")){
+            //dm.printLockTable();
             return runReadSubTransaction(subtransaction);
         }
         else if (subtransaction.requestType.equals("W")){
@@ -134,6 +137,16 @@ public class TransactionManager {
                         transactionMap.get( targetTransactionId ).visitedSet.add( site.siteId );
                         int dataValue = site.dataMap.get( dataId ).dataValue;
                         System.out.println( "x" + dataId + ":" + dataValue );
+                        // check if this is from the read waiting site queue, if so, delete it
+                        Iterator<SubTransaction> iterator = waitingReadingTransactionsDueToUnavailableSite.iterator();
+                        while( iterator.hasNext() ) {
+                            SubTransaction st = iterator.next();
+                            if( st.transactionId == subTransaction.transactionId &&
+                                    st.requestDataIndex == subTransaction.requestDataIndex ) {
+                                iterator.remove();
+                                break;
+                            }
+                        }
                         return false;
                     }
                 }
@@ -146,8 +159,8 @@ public class TransactionManager {
         }
 
         // here means that we can not find a site to read it, need to wait
-        waitingTransactions.add( subTransaction );
-        System.out.println( "can not find a valid site, add to waiting queue" );
+        waitingReadingTransactionsDueToUnavailableSite.add( subTransaction );
+        System.out.println( "can not find a valid site, add to read waiting site queue" );
         return false;
     }
 
@@ -182,13 +195,23 @@ public class TransactionManager {
             if( site.checkAvailableTimeForRO( dataId, subTransaction.timeStamp ) ) {
                 int dataValue = site.dataMap.get( dataId ).dataValue;
                 System.out.println( "x" + dataId + ":" + dataValue );
+                // check if this is from the read waiting site queue, if so, delete it
+                Iterator<SubTransaction> iterator = waitingReadingTransactionsDueToUnavailableSite.iterator();
+                while( iterator.hasNext() ) {
+                    SubTransaction st = iterator.next();
+                    if( st.transactionId == subTransaction.transactionId &&
+                            st.requestDataIndex == subTransaction.requestDataIndex ) {
+                        iterator.remove();
+                        break;
+                    }
+                }
                 return false;
             }
         }
 
         // here means that we can not find a site to read it, need to wait
-        waitingTransactions.add( subTransaction );
-        System.out.println( "can not find a valid site, add to waiting queue" );
+        waitingReadingTransactionsDueToUnavailableSite.add( subTransaction );
+        System.out.println( "can not find a valid site, add to read waiting site queue" );
         return false;
     }
 

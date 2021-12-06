@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class DataManager {
 
@@ -47,6 +48,28 @@ public class DataManager {
             Site s = siteMap.get( i );
             s.print();
             System.out.println();
+        }
+    }
+
+    public void printLockTable() {
+        for( int siteId: siteMap.keySet() ) {
+            System.out.println( "lock on site: " + siteId );
+            Site site = siteMap.get( siteId );
+            for( int dataId: site.lockMap.keySet() ) {
+                Map<Integer, Set<Integer>> lockMap = site.lockMap.get( dataId );
+                Set<Integer> readLock = lockMap.get( 1 );
+                Set<Integer> writeLock = lockMap.get( 2 );
+                System.out.print( "data: " + dataId + " " );
+                System.out.print( "read lock: " );
+                for( int transactionId: readLock ) {
+                    System.out.print( transactionId + "," );
+                }
+                System.out.print( "write lock: " );
+                for( int transactionId: writeLock ) {
+                    System.out.print( transactionId + "," );
+                }
+                System.out.println();
+            }
         }
     }
 }
