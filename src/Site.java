@@ -22,6 +22,7 @@ public class Site {
         this.dataMap = new HashMap<Integer, Data>();
         this.lockMap = new HashMap<>();
         this.generateData();
+        this.statusUpTime = new TreeMap<Integer, Integer>();
         this.statusUpTime.put( 0, Integer.MAX_VALUE );
     }
 

@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 public class TransactionManager {
@@ -14,13 +18,74 @@ public class TransactionManager {
         this.dm = new DataManager();
     }
 
-    // here we get the next subtransaction and run it.
+    // read an input text file
+    public void readInputFile(String filePath) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String query; // query read from input file
+
+            while (true) {
+                // if exists, idx 0 represents request type or dump, idx 1 represents transaction ID or site ID,
+                // idx 2 represents data ID, idx 3 represents data value
+                String[] tokens = null;
+
+                // firstly we check if there is remaining sub-transactions in activeTransactions
+                if (!activeTransactions.isEmpty()){
+                    SubTransaction subtransaction = activeTransactions.get(0);
+                    switch (subtransaction.requestType) {
+                        case "begin":
+                            //runBeginSubTransaction(subtransaction);
+                            break;
+                        case "R": // TODO: Distinguish R and RO here based on begin or beginRO
+                            //runReadSubTransaction(subtransaction);
+                            break;
+                        case "RO":
+                            //runROSubTransaction(subtransaction);
+                            break;
+                        case "W":
+                            //runWriteSubTransaction(subtransaction);
+                            break;
+                        case "end":
+                            //runEndSubTransaction(subtransaction);
+                            break;
+                        case "fail":
+                            //runFailSubTransaction(subtransaction);
+                            break;
+                        case "recover":
+                            //runRecoverSubTransaction(subtransaction);
+                            break;
+                        default: System.out.println("invalid input query format");
+                    }
+                } else {
+                    // read from file
+                    if ((query = br.readLine()) != null){
+                        System.out.println("instruction is: " + query);
+                        Parser parser = new Parser();
+                        tokens = parser.parse(query);
+
+//
+                    }
+                    else {
+                        System.out.println("Finish reading input file");
+                        break;
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Problem reading the input file");
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // here we get the next sub-transaction and run it.
     public void executeNextSubTransaction() {
 
     }
 
     // all the run methods will return if there is release of locks.
-    // this will be used to judge if we will pick the next subtransaction from wait queue or reading from file
+    // this will be used to judge if we will pick the next sub-transaction from wait queue or reading from file
     public boolean runReadSubTransaction( SubTransaction subTransaction ) {
 
         int targetTransactionId = subTransaction.transactionId;
@@ -109,10 +174,10 @@ public class TransactionManager {
     }
 
     public boolean runBeginSubTransaction( SubTransaction subTransaction ) {
-        if (!transactionMap.containsKey(subTransaction.transactionId)) {
-            transactionMap.put(subTransaction.transactionId,
-                    new Transaction(subTransaction.transactionId, subTransaction.timeStamp));
-        }
+//        if (!transactionMap.containsKey(subTransaction.transactionId)) {
+//            transactionMap.put(subTransaction.transactionId,
+//                    new Transaction(subTransaction.transactionId, subTransaction.timeStamp));
+//        }
         return false;
     }
 
