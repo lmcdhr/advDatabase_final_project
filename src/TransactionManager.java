@@ -6,6 +6,18 @@ import java.util.*;
 
 public class TransactionManager {
 
+    public class Pair {
+
+        boolean hasLockReleased;
+        List<Integer> abortedTransactionId;
+
+        public Pair( boolean hasLockReleased, List<Integer> abortedTransactionId ) {
+            this.hasLockReleased = hasLockReleased;
+            this.abortedTransactionId = abortedTransactionId;
+        }
+    }
+
+
     List<SubTransaction> activeTransactions;
     List<SubTransaction> waitingTransactions;
     List<SubTransaction> waitingReadingTransactionsDueToUnavailableSite;
@@ -72,7 +84,7 @@ public class TransactionManager {
     }
 
     // here we get the next sub-transaction and run it.
-    public boolean executeSubTransaction(SubTransaction subtransaction) {
+    public Pair executeSubTransaction(SubTransaction subtransaction) {
         if (subtransaction.requestType.equals("begin")){
             return runBeginSubTransaction(subtransaction, false);
         }
@@ -95,12 +107,12 @@ public class TransactionManager {
         else if (subtransaction.requestType.equals("recover")){
             runRecoverSubTransaction(subtransaction);
         }
-        return false;
+        return new Pair( false, new ArrayList<Integer>() );
     }
 
     // all the run methods will return if there is release of locks.
     // this will be used to judge if we will pick the next sub-transaction from wait queue or reading from file
-    public boolean runReadSubTransaction( SubTransaction subTransaction ) {
+    public Pair runReadSubTransaction( SubTransaction subTransaction ) {
 
         int targetTransactionId = subTransaction.transactionId;
         Transaction targetTransaction = transactionMap.get( targetTransactionId );
@@ -108,13 +120,13 @@ public class TransactionManager {
         // aborted or already blocked
         if( targetTransaction.isAborted ) {
             System.out.println( "transaction already aborted, will not read" );
-            return false;
+            return new Pair( false, new ArrayList<Integer>() );
         }
         for( SubTransaction st: waitingTransactions ) {
             if( st.transactionId == subTransaction.transactionId ) {
                 waitingTransactions.add( subTransaction );
                 System.out.println( "transaction is waiting, will not read" );
-                return false;
+                return new Pair( false, new ArrayList<Integer>() );
             }
         }
 
@@ -147,7 +159,7 @@ public class TransactionManager {
                                 break;
                             }
                         }
-                        return false;
+                        return new Pair( false, new ArrayList<Integer>() );
                     }
                 }
                 else {
@@ -161,10 +173,10 @@ public class TransactionManager {
         // here means that we can not find a site to read it, need to wait
         waitingReadingTransactionsDueToUnavailableSite.add( subTransaction );
         System.out.println( "can not find a valid site, add to read waiting site queue" );
-        return false;
+        return new Pair( false, new ArrayList<Integer>() );
     }
 
-    public boolean runROSubTransaction( SubTransaction subTransaction ) {
+    public Pair runROSubTransaction( SubTransaction subTransaction ) {
 
         int targetTransactionId = subTransaction.transactionId;
         Transaction targetTransaction = transactionMap.get( targetTransactionId );
@@ -172,13 +184,13 @@ public class TransactionManager {
         // aborted or already blocked
         if( targetTransaction.isAborted ) {
             System.out.println( "transaction already aborted, will not read" );
-            return false;
+            return new Pair( false, new ArrayList<Integer>() );
         }
         for( SubTransaction st: waitingTransactions ) {
             if( st.transactionId == subTransaction.transactionId ) {
                 waitingTransactions.add( subTransaction );
                 System.out.println( "transaction is waiting, will not read" );
-                return false;
+                return new Pair( false, new ArrayList<Integer>() );
             }
         }
 
@@ -205,36 +217,36 @@ public class TransactionManager {
                         break;
                     }
                 }
-                return false;
+                return new Pair( false, new ArrayList<Integer>() );
             }
         }
 
         // here means that we can not find a site to read it, need to wait
         waitingReadingTransactionsDueToUnavailableSite.add( subTransaction );
         System.out.println( "can not find a valid site, add to read waiting site queue" );
-        return false;
+        return new Pair( false, new ArrayList<Integer>() );
     }
 
-    public boolean runWriteSubTransaction( SubTransaction subTransaction ) {
-        return false;
+    public Pair runWriteSubTransaction( SubTransaction subTransaction ) {
+        return new Pair( false, new ArrayList<Integer>() );
     }
 
-    public boolean runBeginSubTransaction( SubTransaction subTransaction, boolean isRO ) {
+    public Pair runBeginSubTransaction( SubTransaction subTransaction, boolean isRO ) {
         if (!transactionMap.containsKey(subTransaction.transactionId)) {
             transactionMap.put(subTransaction.transactionId,
                     new Transaction(subTransaction.transactionId, subTransaction.timeStamp, isRO));
         }
-        return false;
+        return new Pair( false, new ArrayList<Integer>() );
     }
 
-    public boolean runEndSubTransaction( SubTransaction subTransaction ) {
+    public Pair runEndSubTransaction( SubTransaction subTransaction ) {
         int targetTransactionId = subTransaction.transactionId;
         Transaction targetTransaction = transactionMap.get( targetTransactionId );
 
         if( targetTransaction.isAborted ) {
             System.out.println( "transaction: " + targetTransactionId + " was aborted " );
             transactionMap.remove( targetTransactionId );
-            return false;
+            return new Pair( false, new ArrayList<Integer>() );
         }
 
         // commit write changes and output write result
@@ -258,13 +270,14 @@ public class TransactionManager {
         dm.removeLockForTransaction( targetTransactionId );
         transactionMap.remove( targetTransactionId );
         System.out.println( "transaction: " + targetTransactionId + " was committed " );
-        return true;
+        return new Pair( true, new ArrayList<Integer>( subTransaction.transactionId ) );
     }
 
-    public boolean runFailSubTransaction( SubTransaction subTransaction ) {
+    public Pair runFailSubTransaction( SubTransaction subTransaction ) {
         int siteId = subTransaction.siteId;
         dm.siteMap.get( siteId ).fail( subTransaction.timeStamp );
         boolean haveTransactionsAborted = false;
+        List<Integer> abortedTransactionId = new ArrayList<Integer>();
         for( int transactionId: transactionMap.keySet() ) {
             if( transactionMap.get( transactionId ).visitedSet.contains( siteId ) ) {
                 System.out.println( "transaction: " + transactionId + " is aborted due to the fail of site: " + siteId );
@@ -286,15 +299,16 @@ public class TransactionManager {
                     }
                 }
                 dm.removeLockForTransaction( transactionId );
+                abortedTransactionId.add( transactionId );
             }
         }
-        return haveTransactionsAborted;
+        return new Pair( haveTransactionsAborted, abortedTransactionId );
     }
 
-    public boolean runRecoverSubTransaction( SubTransaction subTransaction ) {
+    public Pair runRecoverSubTransaction( SubTransaction subTransaction ) {
         int siteId = subTransaction.siteId;
         dm.siteMap.get( siteId ).recover( subTransaction.timeStamp );
-        return false;
+        return new Pair( false, new ArrayList<Integer>() );
     }
 
 }
