@@ -104,7 +104,7 @@ public class TransactionManager {
         else if (subtransaction.requestType.equals("recover")){
             runRecoverSubTransaction(subtransaction);
         }
-        // return false;
+        return false;
     }
 
     // all the run methods will return if there is release of locks.
