@@ -73,7 +73,54 @@ public class TransactionManager {
                     }
                 }
                 assert subtransaction != null;
-                executeSubTransaction(subtransaction);
+                // if there is release of lock, move appropriate sub-transactions from waitQ to activeQ
+                Pair executedPair = executeSubTransaction(subtransaction);
+                if (executedPair.hasLockReleased){
+                    Set<SubTransaction> tempRes = new HashSet<>();
+                    Set<Integer> dataIdxAffected = new HashSet<Integer>();
+                    // int transactionID = subtransaction.transactionId;
+                    List<Integer> abortedTransactionIDs = executedPair.abortedTransactionId;
+
+                    for(int i=1; i<=10; i++){ // site id
+                        Site site = this.dm.siteMap.get(i);
+                        for (int j=1; j<=20; j++){ // data idx
+                            Map<Integer, Set<Integer>> dataLockMap = site.lockMap.get(j);
+                            for (int k=1; k<=2; k++){ // 1 for read, 2 for write
+                                Set<Integer> transactionSet = dataLockMap.get(k);
+                                for (int tid: transactionSet){
+                                    for (int transactionID: abortedTransactionIDs){
+                                        if (tid == transactionID){
+                                            dataIdxAffected.add(j);
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                    // find first transaction that is waiting for the released data
+                    for (int dataID: dataIdxAffected){
+                        Iterator<SubTransaction> listIterator = waitingTransactions.iterator();
+                        while (listIterator.hasNext()){
+                            SubTransaction subtrasaction = listIterator.next();
+                            if (subtransaction.requestDataIndex == dataID){
+                                tempRes.add(subtransaction);
+                                break;
+                            }
+                        }
+                    }
+                    // move sub-transactions in tempRes from waitQ to activeQ
+                    for (SubTransaction sub: tempRes){
+                        for (SubTransaction wSub: waitingTransactions){
+                            if (sub.equals(wSub)){
+                                waitingTransactions.remove(wSub);
+                                activeTransactions.add(wSub);
+                            }
+                        }
+                    }
+
+
+                }
             }
         } catch (FileNotFoundException e) {
             System.out.println("Problem reading the input file");
@@ -104,10 +151,11 @@ public class TransactionManager {
         else if (subtransaction.requestType.equals("fail")){
             return runFailSubTransaction(subtransaction);
         }
-        else if (subtransaction.requestType.equals("recover")){
-            runRecoverSubTransaction(subtransaction);
+        else {
+            return runRecoverSubTransaction(subtransaction);
         }
-        return new Pair( false, new ArrayList<Integer>() );
+        //return new Pair( false, new ArrayList<Integer>() );
+
     }
 
     // all the run methods will return if there is release of locks.
