@@ -10,6 +10,7 @@ public class Site {
     // lockMap: key: dataId, value: lockMap of corresponding data(dataLockMap)
     // dataLockMap: key: lock type, value: a hashset,
     // inside the set is the id of transactions that asked(already holds) for such lock
+    // ( even though it is a set, but actually there will be only on element inside )
     public Map<Integer, Map<Integer, Set<Integer>>> lockMap;
 
     // this map will save the time interval when site is up
@@ -131,10 +132,9 @@ public class Site {
             Map<Integer, Set<Integer>> dataLocks = lockMap.get( dataId );
             for( int lockType: dataLocks.keySet() ) {
                 if( dataLocks.get( lockType ).contains( transactionId ) ) {
-                    dataLocks.get( lockType ).remove( transactionId );
+                    lockMap.get( dataId ).get( lockType ).remove( transactionId );
                 }
             }
-            lockMap.put( dataId, dataLocks );
         }
     }
 
