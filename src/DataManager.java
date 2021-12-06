@@ -17,14 +17,29 @@ public class DataManager {
         }
     }
 
-    public void fail( int siteId ) {
+    public void fail( int siteId, int timeStamp ) {
         Site site = this.siteMap.get( siteId );
-        site.fail();
+        site.fail( timeStamp );
     }
 
-    public void recover( int siteId ) {
+    public void recover( int siteId, int timeStamp ) {
         Site site = this.siteMap.get( siteId );
-        site.recover();
+        site.recover( timeStamp );
+    }
+
+    public void write( int siteId, int dataId, int dataValue, int timeStamp ) {
+        Site site = this.siteMap.get( siteId );
+        site.writeValueToData( dataId, dataValue, timeStamp );
+    }
+
+    public void removeLockForTransaction( int transactionId ) {
+        for( int siteId: siteMap.keySet() ) {
+            siteMap.get( siteId ).removeLockFromTransaction( transactionId );
+        }
+    }
+
+    public void implementReadLockOnSite( int siteId, int dataId, int transactionId ) {
+        siteMap.get( siteId ).lockMap.get( dataId ).get( 1 ).add( transactionId );
     }
 
     public void dump() {
