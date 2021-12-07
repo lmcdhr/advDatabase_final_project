@@ -522,12 +522,39 @@ public class TransactionManager {
         return -1;
     }
 
-    private boolean isCycleDetected( int startTransactionId ) {
-        return false;
+    public Set<Integer> dfs(int startTID, Set<Integer> visited){
+        if (visited.contains(startTID)){
+            return visited;
+        }
+        visited.add(startTID);
+        for (Integer neighbourTID: transactionMap.get(startTID).waitingGraphEdges.keySet()){
+            Set<Integer> res = dfs(neighbourTID, visited);
+            if(res.isEmpty())
+                visited.remove(neighbourTID);
+        }
+        return new HashSet<Integer>();
     }
 
+    private boolean isCycleDetected( int startTransactionId ) {
+        for (int neighbour: transactionMap.get(2).waitingGraphEdges.keySet()){
+            System.out.println("T2 is waiting for: " + neighbour);
+        }
+        Set<Integer> visited = new HashSet<Integer>();
+        return !dfs(startTransactionId, visited).isEmpty();
+    }
+
+    // call this when we know there is a cycle
     private int getYoungestTransactionIdToAbort( int startPointId ) {
-        return -1;
+        Set<Integer> cycle = new HashSet<Integer>();
+        Set<Integer> visited = new HashSet<Integer>();
+        cycle = dfs(startPointId, visited);
+        int candidate = Integer.MIN_VALUE;
+        for (int tid: cycle){
+            if (transactionMap.get(tid).birthTime > candidate){
+                candidate = tid;
+            }
+        }
+        return candidate;
     }
 
     private void removeBlockedAndActiveSubtransactionsDueToAbort( int abortedTransactionId ) {
