@@ -1,3 +1,7 @@
+// T4 should abort due to the fail of site 2
+// T1 cannot find a valid site to read x1, will be added to read waiting site queue
+// After the recovery of site2, T2 annd T3 can read x1
+// R(T4,x7) not executed because T4 has been aborted
 begin(T1)
 beginRO(T2)
 begin(T3)

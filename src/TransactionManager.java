@@ -51,6 +51,7 @@ public class TransactionManager {
                 } else {
                     // read from file
                     if ((query = br.readLine()) != null){
+                        if (query.startsWith("//")) continue;
                         timestamp++;
                         System.out.println("instruction is: " + query + " at time: " + timestamp);
                         Parser parser = new Parser();
