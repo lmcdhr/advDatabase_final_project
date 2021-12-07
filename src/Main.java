@@ -1,3 +1,8 @@
+/*Team Members:
+1. MuCheng Luo (ml6389)
+2. Jingwei Ye (jy3555)
+Date: 12/07/2021*/
+
 public class Main {
 
     public static void main( String[] args ) {
