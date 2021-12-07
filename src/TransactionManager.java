@@ -46,7 +46,8 @@ public class TransactionManager {
                 // firstly we check if there is remaining sub-transactions in activeTransactions
                 if (!activeTransactions.isEmpty()){
                     subtransaction = activeTransactions.get(0);
-
+                    activeTransactions.remove( 0 );
+                    System.out.println( "instruction is: " + subtransaction.requestType + " " + subtransaction.transactionId + " " + subtransaction.requestDataIndex );
                 } else {
                     // read from file
                     if ((query = br.readLine()) != null){
@@ -62,6 +63,9 @@ public class TransactionManager {
                         }
                         else if ("R".equals(tokens[0])){
                             subtransaction = new SubTransaction(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), tokens[0], timestamp);
+                            if( transactionMap.get( subtransaction.transactionId ).isRO ) {
+                                subtransaction.timeStamp = transactionMap.get( subtransaction.transactionId ).birthTime;
+                            }
                         }
                         else if ("W".equals(tokens[0])){
                             subtransaction = new SubTransaction(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]), tokens[0], timestamp);
@@ -75,11 +79,13 @@ public class TransactionManager {
                 assert subtransaction != null;
                 // if there is release of lock, move appropriate sub-transactions from waitQ to activeQ
                 Pair executedPair = executeSubTransaction(subtransaction);
-                if (executedPair.hasLockReleased){
+                if ( executedPair.hasLockReleased ){
+                    //System.out.println( "go into waiting queue: " + waitingTransactions.size() );
                     Set<SubTransaction> tempRes = new HashSet<>();
                     Set<Integer> dataIdxAffected = new HashSet<Integer>();
                     // int transactionID = subtransaction.transactionId;
                     List<Integer> abortedTransactionIDs = executedPair.abortedTransactionId;
+                    //System.out.println( "aborted id: " + abortedTransactionIDs.get( 0 ) );
 
                     for(int i=1; i<=10; i++){ // site id
                         Site site = this.dm.siteMap.get(i);
@@ -89,15 +95,18 @@ public class TransactionManager {
                                 for (int k=1; k<=2; k++){ // 1 for read, 2 for write
                                     Set<Integer> transactionSet = dataLockMap.get(k);
                                     for (int tid: transactionSet){
-                                        for (int transactionID: abortedTransactionIDs){
-                                            if (tid == transactionID){
-                                                dataIdxAffected.add(j);
-                                            }
+                                        //System.out.println( "transaction: " + tid + " has a lock on data: " + j + " on site: " + i );
+                                        if ( abortedTransactionIDs.contains( tid ) ){
+                                            //System.out.println( "found a match: " + tid + " for data: " + j + " int site: " + i );
+                                            dataIdxAffected.add(j);
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                    for( int tId: executedPair.abortedTransactionId ) {
+                        dm.removeLockForTransaction( tId );
                     }
                     // find first transaction that is waiting for the released data
                     for (int dataID: dataIdxAffected){
@@ -112,10 +121,13 @@ public class TransactionManager {
                     }
                     // move sub-transactions in tempRes from waitQ to activeQ
                     for (SubTransaction sub: tempRes){
-                        for (SubTransaction wSub: waitingTransactions){
-                            if (sub.equals(wSub)){
-                                waitingTransactions.remove(wSub);
-                                activeTransactions.add(wSub);
+                        Iterator<SubTransaction> listIterator = waitingTransactions.iterator();
+                        while (listIterator.hasNext()){
+                            SubTransaction st = listIterator.next();
+                            if ( sub.equals( st ) ){
+                                activeTransactions.add( st );
+                                System.out.println( "add subtransaction from waiting queue into active queue: " + st.requestType + " " + st.transactionId + " " + st.requestDataIndex );
+                                listIterator.remove();
                             }
                         }
                     }
@@ -234,7 +246,7 @@ public class TransactionManager {
                 else {
                     // here means that it needs to wait for a write lock.
                     // we will implement wait edge and check cycle to decide if we need to abort
-
+                    System.out.println( "need to wait since there is lock on site: " + siteId );
                     // firstly we will need to add waiting edge
                     int parentTransactionId = getTransactionIdWriteLockOnData( subTransaction.requestDataIndex );
                     if( !transactionMap.get( targetTransactionId ).waitingGraphEdges.containsKey( parentTransactionId ) ) {
@@ -247,7 +259,6 @@ public class TransactionManager {
                         int abortedTransactionId = getYoungestTransactionIdToAbort(targetTransactionId);
                         updateCycleGraph( abortedTransactionId );
                         transactionMap.get( abortedTransactionId ).isAborted = true;
-                        dm.removeLockForTransaction( abortedTransactionId );
                         removeBlockedAndActiveSubtransactionsDueToAbort( abortedTransactionId );
                         return new Pair( true, new ArrayList<Integer>( Arrays.asList( abortedTransactionId ) ) );
                     }
@@ -294,7 +305,7 @@ public class TransactionManager {
             // for now, we already find the data in this site
             // then, check if the site is up from last commit until RO command
             if( site.checkAvailableTimeForRO( dataId, subTransaction.timeStamp ) ) {
-                int dataValue = site.dataMap.get( dataId ).dataValue;
+                int dataValue = site.dataMap.get( dataId ).valueRecord.floorEntry( subTransaction.timeStamp ).getValue();
                 System.out.println( "x" + dataId + ":" + dataValue );
                 return new Pair( false, new ArrayList<Integer>() );
             }
@@ -307,6 +318,96 @@ public class TransactionManager {
     }
 
     public Pair runWriteSubTransaction( SubTransaction subTransaction ) {
+
+        int targetTransactionId = subTransaction.transactionId;
+        Transaction targetTransaction = transactionMap.get( targetTransactionId );
+
+        // aborted or already blocked
+        if( targetTransaction.isAborted ) {
+            System.out.println( "transaction already aborted, will not read" );
+            return new Pair( false, new ArrayList<Integer>() );
+        }
+        for( SubTransaction st: waitingTransactions ) {
+            if( st.transactionId == subTransaction.transactionId ) {
+                waitingTransactions.add( subTransaction );
+                System.out.println( "transaction is waiting, will not read" );
+                return new Pair( false, new ArrayList<Integer>() );
+            }
+        }
+
+        // attempt to write to all available site
+        boolean canAcquireAllPossibleWriteLock = true;
+        for( int siteId: dm.siteMap.keySet() ) {
+            Site site = dm.siteMap.get( siteId );
+            if( !site.isStatusUp || !site.dataMap.containsKey( subTransaction.requestDataIndex ) ) {
+                continue;
+            }
+            if( !site.canAcquireWriteLock( subTransaction.requestDataIndex, targetTransactionId ) ) {
+                canAcquireAllPossibleWriteLock = false;
+                // if can not get write lock, get the parent it will be waiting for
+                // firstly, try to get the parent from waiting queue
+                boolean hasFoundParent = false;
+                for( int i = waitingTransactions.size() - 1; i>=0; i--) {
+                    SubTransaction candidate = waitingTransactions.get( i );
+                    if( candidate.requestDataIndex == subTransaction.requestDataIndex ) {
+                        int parentTransactionId = candidate.transactionId;
+                        if( !transactionMap.get( targetTransactionId ).waitingGraphEdges.containsKey( parentTransactionId ) ) {
+                            transactionMap.get( targetTransactionId ).waitingGraphEdges.put( parentTransactionId, new HashSet<Integer>() );
+                        }
+                        transactionMap.get( targetTransactionId ).waitingGraphEdges.get( parentTransactionId ).add( subTransaction.requestDataIndex );
+                        hasFoundParent = true;
+                        break;
+                    }
+                }
+                // if can not find parent from wait queue, try to find it from transactions that holds the lock but not committed
+                if( !hasFoundParent ) {
+                    Set<Integer> localWaitingEdgeParent = site.transactionsHoldLocksOnData( subTransaction.requestDataIndex, targetTransactionId );
+                    for( int parentTransactionId: localWaitingEdgeParent ) {
+                        if( !transactionMap.get( targetTransactionId ).waitingGraphEdges.containsKey( parentTransactionId ) ) {
+                            transactionMap.get( targetTransactionId ).waitingGraphEdges.put( parentTransactionId, new HashSet<Integer>() );
+                        }
+                        transactionMap.get( targetTransactionId ).waitingGraphEdges.get( parentTransactionId ).add( subTransaction.requestDataIndex );
+                    }
+                }
+            }
+        }
+
+        // if can not acquire all write lock, we should wait. All wait edges have been set in previous step
+        if( !canAcquireAllPossibleWriteLock ) {
+            // check if there will be edges in the new graph, if so, abort youngest
+            System.out.println( "lock conflict, need to wait " );
+            if( isCycleDetected( targetTransactionId ) ) {
+                int abortedTransactionId = getYoungestTransactionIdToAbort( targetTransactionId );
+                updateCycleGraph( abortedTransactionId );
+                transactionMap.get( abortedTransactionId ).isAborted = true;
+                removeBlockedAndActiveSubtransactionsDueToAbort( abortedTransactionId );
+                // check if the youngest is the target transaction itself
+                if( abortedTransactionId != targetTransactionId ) {
+                    waitingTransactions.add( subTransaction );
+                }
+                return new Pair( true, new ArrayList<Integer>( Arrays.asList( abortedTransactionId ) ) );
+            }
+            waitingTransactions.add( subTransaction );
+            return new Pair( false, new ArrayList<Integer>() );
+        }
+        // can get all write lock, save the result in write cache
+        else {
+            for( int siteId: dm.siteMap.keySet() ) {
+                Site site = dm.siteMap.get( siteId );
+                if( !site.isStatusUp || !site.dataMap.containsKey( subTransaction.requestDataIndex ) ) {
+                    continue;
+                }
+                if( !targetTransaction.writeCache.containsKey( siteId ) ) {
+                    transactionMap.get( targetTransactionId ).writeCache.put( siteId, new ArrayList<int[]>() );
+                }
+                transactionMap.get( targetTransactionId ).writeCache.get( siteId ).add( new int[]{ subTransaction.requestDataIndex, subTransaction.requestDataValueChangeTo } );
+                System.out.println( "write to site: " + siteId + " data: " + subTransaction.requestDataIndex + " with value: " +
+                        subTransaction.requestDataValueChangeTo + " at time: " + subTransaction.timeStamp );
+                dm.implementWriteLockOnSite( siteId, subTransaction.requestDataIndex, targetTransactionId );
+                transactionMap.get( targetTransactionId ).visitedSet.add( siteId );
+            }
+        }
+
         return new Pair( false, new ArrayList<Integer>() );
     }
 
@@ -330,19 +431,19 @@ public class TransactionManager {
 
         // commit write changes and output write result
         for( int siteId: targetTransaction.writeCache.keySet() ) {
-            Site site = dm.siteMap.get( siteId );
             for( int[] data: targetTransaction.writeCache.get( siteId ) ) {
                 int dataId = data[0];
                 int value = data[1];
                 dm.write( siteId, dataId, value, subTransaction.timeStamp );
+                dm.siteMap.get( siteId ).dataMap.get( dataId ).canBeRead = true;
             }
         }
         // remove all blocked subtransactions in waiting queue
         removeBlockedAndActiveSubtransactionsDueToAbort( targetTransactionId );
-        dm.removeLockForTransaction( targetTransactionId );
+        updateCycleGraph( targetTransactionId );
         transactionMap.remove( targetTransactionId );
         System.out.println( "transaction: " + targetTransactionId + " was committed " );
-        return new Pair( true, new ArrayList<Integer>( subTransaction.transactionId ) );
+        return new Pair( true, new ArrayList<Integer>( Arrays.asList( subTransaction.transactionId ) ) );
     }
 
     public Pair runFailSubTransaction( SubTransaction subTransaction ) {
@@ -361,7 +462,6 @@ public class TransactionManager {
                 // remove all active and blocked subtransactions in two queues
                 removeBlockedAndActiveSubtransactionsDueToAbort( transactionId );
                 updateCycleGraph( transactionId );
-                dm.removeLockForTransaction( transactionId );
                 abortedTransactionId.add( transactionId );
             }
         }
@@ -410,10 +510,11 @@ public class TransactionManager {
     private int getTransactionIdWriteLockOnData( int dataIndex ) {
         for( int siteId: dm.siteMap.keySet() ) {
             Site site = dm.siteMap.get( siteId );
-            if( !site.isStatusUp ) {
+            if( !site.isStatusUp || !site.dataMap.containsKey( dataIndex ) ) {
                 continue;
             }
-            for( int parentTransactionId: site.lockMap.get( dataIndex ).get( 2 ) ) {
+            Set<Integer> writeLocks = site.lockMap.get( dataIndex ).get( 2 );
+            for( int parentTransactionId: writeLocks ) {
                 return parentTransactionId;
             }
         }
