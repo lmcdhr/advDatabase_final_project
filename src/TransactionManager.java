@@ -523,24 +523,34 @@ public class TransactionManager {
     }
 
     public Set<Integer> dfs(int startTID, Set<Integer> visited){
+        System.out.println( "checking TID: " + startTID + " has " + transactionMap.get( startTID ).waitingGraphEdges.size() + " neighbors " );
         if (visited.contains(startTID)){
+            System.out.println( "has cycle! size of cycle: " + visited.size() );
             return visited;
         }
+
         visited.add(startTID);
-        for (Integer neighbourTID: transactionMap.get(startTID).waitingGraphEdges.keySet()){
+        for (int neighbourTID: transactionMap.get(startTID).waitingGraphEdges.keySet()){
+            System.out.println( "next step, looking into: " + neighbourTID );
             Set<Integer> res = dfs(neighbourTID, visited);
-            if(res.isEmpty())
+            if(res.isEmpty()){
                 visited.remove(neighbourTID);
+            }
+            else {
+                return visited;
+            }
         }
         return new HashSet<Integer>();
     }
 
     private boolean isCycleDetected( int startTransactionId ) {
-        for (int neighbour: transactionMap.get(2).waitingGraphEdges.keySet()){
-            System.out.println("T2 is waiting for: " + neighbour);
+        for (int neighbour: transactionMap.get(startTransactionId ).waitingGraphEdges.keySet()){
+            System.out.println(startTransactionId + " is waiting for: " + neighbour);
         }
         Set<Integer> visited = new HashSet<Integer>();
-        return !dfs(startTransactionId, visited).isEmpty();
+        boolean res = dfs(startTransactionId, visited).size() != 0;
+        System.out.println( "has cycle? " + res );
+        return res;
     }
 
     // call this when we know there is a cycle
@@ -554,6 +564,7 @@ public class TransactionManager {
                 candidate = tid;
             }
         }
+        System.out.println( "get youngest: " + candidate );
         return candidate;
     }
 
