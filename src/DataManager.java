@@ -35,12 +35,24 @@ public class DataManager {
 
     public void removeLockForTransaction( int transactionId ) {
         for( int siteId: siteMap.keySet() ) {
-            siteMap.get( siteId ).removeLockFromTransaction( transactionId );
+            Site site = siteMap.get( siteId );
+            for( int dataId: siteMap.get( siteId ).lockMap.keySet() ) {
+                Map<Integer, Set<Integer>> dataLockMap =  site.lockMap.get( dataId );
+                for( int lockType: dataLockMap.keySet() ) {
+                    if( dataLockMap.get( lockType ).contains( transactionId ) ) {
+                        siteMap.get( siteId ).lockMap.get( dataId ).get( lockType ).remove( transactionId );
+                    }
+                }
+            }
         }
     }
 
     public void implementReadLockOnSite( int siteId, int dataId, int transactionId ) {
         siteMap.get( siteId ).lockMap.get( dataId ).get( 1 ).add( transactionId );
+    }
+
+    public void implementWriteLockOnSite( int siteId, int dataId, int transactionId ) {
+        siteMap.get( siteId ).lockMap.get( dataId ).get( 2 ).add( transactionId );
     }
 
     public void dump() {

@@ -70,14 +70,6 @@ public class Site {
         statusUpTime.put( timeStamp, Integer.MAX_VALUE );
     }
 
-    public void applyLock( int dataIndex, int lockType, int transactionId ) {
-        this.lockMap.get( dataIndex ).get( lockType ).add( transactionId );
-    }
-
-    public void removeLock( int dataIndex, int lockType, int transactionId ) {
-        this.lockMap.get( dataIndex ).get( lockType ).remove( transactionId );
-    }
-
     public boolean canAcquireReadLock( int dataIndex, int transactionId ) {
         Map<Integer, Set<Integer>> dataLockMap = lockMap.get( dataIndex );
         Set<Integer> writeLock = dataLockMap.get( 2 );
@@ -87,6 +79,41 @@ public class Site {
             }
         }
         return true;
+    }
+
+    public boolean canAcquireWriteLock( int dataIndex, int transactionId ) {
+        Map<Integer, Set<Integer>> dataLockMap = lockMap.get( dataIndex );
+        Set<Integer> readLock = dataLockMap.get( 1 );
+        Set<Integer> writeLock = dataLockMap.get( 2 );
+        for( int tId: readLock ) {
+            if( tId != transactionId ) {
+                return false;
+            }
+        }
+        for( int tId: writeLock ) {
+            if( tId != transactionId ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public Set<Integer> transactionsHoldLocksOnData( int dataIndex, int transactionId ) {
+        Set<Integer> res = new HashSet<Integer>();
+        Map<Integer, Set<Integer>> dataLockMap = lockMap.get( dataIndex );
+        Set<Integer> readLock = dataLockMap.get( 1 );
+        Set<Integer> writeLock = dataLockMap.get( 2 );
+        for( int tId: readLock ) {
+            if( tId != transactionId ) {
+                res.add( tId );
+            }
+        }
+        for( int tId: writeLock ) {
+            if( tId != transactionId ) {
+                res.add( tId );
+            }
+        }
+        return res;
     }
 
     public void eraseAllLock() {
@@ -124,22 +151,11 @@ public class Site {
     public void writeValueToData( int dataId, int dataValue, int timeStamp ) {
         dataMap.get( dataId ).valueRecord.put( timeStamp, dataValue );
         dataMap.get( dataId ).updateValue();
-        System.out.println( "write to site: " + siteId + " data: " + dataId + " with value: " + dataValue + " at time: " + timeStamp );
-    }
-
-    public void removeLockFromTransaction( int transactionId ) {
-        for( int dataId: lockMap.keySet() ) {
-            Map<Integer, Set<Integer>> dataLocks = lockMap.get( dataId );
-            for( int lockType: dataLocks.keySet() ) {
-                if( dataLocks.get( lockType ).contains( transactionId ) ) {
-                    lockMap.get( dataId ).get( lockType ).remove( transactionId );
-                }
-            }
-        }
+        //System.out.println( "write to site: " + siteId + " data: " + dataId + " with value: " + dataValue + " at time: " + timeStamp );
     }
 
     public boolean checkAvailableTimeForRO( int dataId, int ROTime ) {
-        int prevCommitTime = dataMap.get( dataId ).valueRecord.lastKey();
+        int prevCommitTime = dataMap.get( dataId ).valueRecord.floorKey( ROTime );
         int prevUpTime = statusUpTime.floorKey( prevCommitTime );
         int prevUpEndTime = statusUpTime.get( prevUpTime );
         if( prevUpEndTime < ROTime ) {
