@@ -84,12 +84,11 @@ public class TransactionManager {
                 // if there is release of lock, move appropriate sub-transactions from waitQ to activeQ
                 Pair executedPair = executeSubTransaction(subtransaction);
                 if ( executedPair.hasLockReleased ){
-                    //System.out.println( "go into waiting queue: " + waitingTransactions.size() );
+                    System.out.println( "go into waiting queue: " + waitingTransactions.size() );
                     Set<SubTransaction> tempRes = new HashSet<>();
                     Set<Integer> dataIdxAffected = new HashSet<Integer>();
-                    // int transactionID = subtransaction.transactionId;
                     List<Integer> abortedTransactionIDs = executedPair.abortedTransactionId;
-                    //System.out.println( "aborted id: " + abortedTransactionIDs.get( 0 ) );
+                    System.out.println( "aborted id: " + abortedTransactionIDs.get( 0 ) );
 
                     for(int i=1; i<=10; i++){ // site id
                         Site site = this.dm.siteMap.get(i);
@@ -99,9 +98,9 @@ public class TransactionManager {
                                 for (int k=1; k<=2; k++){ // 1 for read, 2 for write
                                     Set<Integer> transactionSet = dataLockMap.get(k);
                                     for (int tid: transactionSet){
-                                        //System.out.println( "transaction: " + tid + " has a lock on data: " + j + " on site: " + i );
+                                        System.out.println( "transaction: " + tid + " has a lock on data: " + j + " on site: " + i );
                                         if ( abortedTransactionIDs.contains( tid ) ){
-                                            //System.out.println( "found a match: " + tid + " for data: " + j + " int site: " + i );
+                                            System.out.println( "found a match: " + tid + " for data: " + j + " int site: " + i );
                                             dataIdxAffected.add(j);
                                         }
                                     }
@@ -527,9 +526,11 @@ public class TransactionManager {
     }
 
     public Set<Integer> dfs(int startTID, Set<Integer> visited){
+        System.out.println( "checking TID: " + startTID + " has " + transactionMap.get( startTID ).waitingGraphEdges.size() + " neighbors " );
         if (visited.contains(startTID)){
             return visited;
         }
+
         visited.add(startTID);
         for (int neighbourTID: transactionMap.get(startTID).waitingGraphEdges.keySet()){
             Set<Integer> res = dfs(neighbourTID, visited);
@@ -546,7 +547,8 @@ public class TransactionManager {
 
     private boolean isCycleDetected( int startTransactionId ) {
         Set<Integer> visited = new HashSet<Integer>();
-        return !dfs(startTransactionId, visited).isEmpty();
+        boolean res = dfs(startTransactionId, visited).size() != 0;
+        return res;
     }
 
     // call this when we know there is a cycle
