@@ -8,29 +8,25 @@ public class Parser {
         int endIdx;
         if (openBracketIdx != -1){
             requestType = query.substring(0, openBracketIdx);
-            //System.out.println("request type is: " + requestType);
         }
         if ("begin".equals(requestType) || "end".equals(requestType) || "beginRO".equals(requestType)) {
             tokens[0] = requestType;
             startIdx = query.indexOf("T") + 1;
             endIdx = query.indexOf(")");
-            String transactionID = query.substring(startIdx, endIdx);
+            String transactionID = query.substring(startIdx, endIdx).trim();
             tokens[1] = transactionID;
-            //System.out.println("transaction ID is: " + tokens[1]);
         }
         else if ("R".equals(requestType)){
             tokens[0] = requestType;
             startIdx = query.indexOf("T") + 1;
             endIdx = query.indexOf(",");
-            String transactionID = query.substring(startIdx, endIdx);
+            String transactionID = query.substring(startIdx, endIdx).trim();
             tokens[1] = transactionID;
-            //System.out.println("transaction ID is: " + tokens[1]);
 
             startIdx = query.indexOf("x") + 1;
             endIdx = query.indexOf(")");
-            String dataID = query.substring(startIdx,endIdx);
+            String dataID = query.substring(startIdx,endIdx).trim();
             tokens[2] = dataID;
-            //System.out.println("data ID is: " + tokens[2]);
         }
         else if ("W".equals(requestType)){
             tokens[0] = requestType;
@@ -40,24 +36,19 @@ public class Parser {
             String[] temp = subquery.split(",");
             // handle transaction ID and Data ID here
             for (int i=0; i<temp.length - 1; i++){
-                tokens[i+1] = temp[i].substring(1);
+                tokens[i+1] = temp[i].trim().substring(1);
             }
-            tokens[3] = temp[2]; // data value
-            //System.out.println("transaction ID is: " + tokens[1]);
-            //System.out.println("data ID is: " + tokens[2]);
-            //System.out.println("data value is: " + tokens[3]);
+            tokens[3] = temp[2].trim(); // data value
         }
         else if ("fail".equals(requestType) || "recover".equals(requestType)){
             tokens[0] = requestType;
             startIdx = query.indexOf("(") + 1;
             endIdx = query.indexOf(")");
-            String siteID = query.substring(startIdx, endIdx);
+            String siteID = query.substring(startIdx, endIdx).trim();
             tokens[1] = siteID;
-            //System.out.println("site ID is: " + tokens[1]);
         }
         else if ("dump".equals(requestType)){
             tokens[0] = "dump";
-            //System.out.println("" + tokens[0]);
         }
 
 
