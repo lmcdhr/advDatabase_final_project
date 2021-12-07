@@ -70,6 +70,10 @@ public class TransactionManager {
                         else if ("W".equals(tokens[0])){
                             subtransaction = new SubTransaction(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]), tokens[0], timestamp);
                         }
+                        else if ("dump".equals(tokens[0])){
+                            this.dm.dump();
+                            continue;
+                        }
                     }
                     else {
                         System.out.println("Finish reading input file");
@@ -527,18 +531,20 @@ public class TransactionManager {
             return visited;
         }
         visited.add(startTID);
-        for (Integer neighbourTID: transactionMap.get(startTID).waitingGraphEdges.keySet()){
+        for (int neighbourTID: transactionMap.get(startTID).waitingGraphEdges.keySet()){
             Set<Integer> res = dfs(neighbourTID, visited);
-            if(res.isEmpty())
+            if(res.isEmpty()){
                 visited.remove(neighbourTID);
+            }
+            else {
+                return visited;
+            }
+
         }
         return new HashSet<Integer>();
     }
 
     private boolean isCycleDetected( int startTransactionId ) {
-        for (int neighbour: transactionMap.get(2).waitingGraphEdges.keySet()){
-            System.out.println("T2 is waiting for: " + neighbour);
-        }
         Set<Integer> visited = new HashSet<Integer>();
         return !dfs(startTransactionId, visited).isEmpty();
     }

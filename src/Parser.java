@@ -56,7 +56,7 @@ public class Parser {
             //System.out.println("site ID is: " + tokens[1]);
         }
         else if ("dump".equals(requestType)){
-            tokens[0] = requestType;
+            tokens[0] = "dump";
             //System.out.println("" + tokens[0]);
         }
 

@@ -5,6 +5,6 @@ public class Main {
         String filePath = "src/tests/test18.txt";
         TransactionManager tm = new TransactionManager();
         tm.readInputFile(filePath);
-        tm.dm.dump();
+        // tm.dm.dump();
     }
 }
