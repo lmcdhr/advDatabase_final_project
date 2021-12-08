@@ -1,0 +1,39 @@
+
+This is test 11
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: fail(1) at time: 3
+instruction is: end(T1) at time: 4
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+instruction is: begin(T3) at time: 5
+instruction is: end(T3) at time: 6
+transaction: 3 was committed 
+go into waiting queue: 0
+aborted id: 3
+instruction is: recover(1) at time: 7
+instruction is: fail(2) at time: 8
+instruction is: fail(3) at time: 9
+instruction is: fail(4) at time: 10
+instruction is: fail(5) at time: 11
+instruction is: fail(6) at time: 12
+instruction is: fail(7) at time: 13
+instruction is: fail(8) at time: 14
+instruction is: fail(9) at time: 15
+instruction is: fail(10) at time: 16
+instruction is: R(T2,x2) at time: 17
+can not find a valid site, add to read waiting site queue
+instruction is: recover(4) at time: 18
+added: 2 2
+instruction is: R 2 2
+can not find a valid site, add to read waiting site queue
+instruction is: R(T2,x3) at time: 19
+x3:20
+instruction is: end(T2) at time: 20
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+transaction: 2 has a lock on data: 3 on site: 4
+found a match: 2 for data: 3 int site: 4
+Finish reading input file

@@ -1,0 +1,58 @@
+
+This is test 3
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: R(T1,x2) at time: 3
+x2:22
+instruction is: R(T2,x2) at time: 4
+x2:22
+instruction is: W(T2,x2,10) at time: 5
+lock conflict, need to wait 
+checking TID: 2 has 1 neighbors 
+checking TID: 1 has 0 neighbors 
+instruction is: end(T1) at time: 6
+transaction: 1 was committed 
+go into waiting queue: 1
+aborted id: 1
+transaction: 1 has a lock on data: 2 on site: 1
+found a match: 1 for data: 2 int site: 1
+transaction: 2 has a lock on data: 2 on site: 1
+add subtransaction from waiting queue into active queue: W 2 2
+instruction is: W 2 2
+write to site: 1 data: 2 with value: 10 at time: 5
+write to site: 2 data: 2 with value: 10 at time: 5
+write to site: 3 data: 2 with value: 10 at time: 5
+write to site: 4 data: 2 with value: 10 at time: 5
+write to site: 5 data: 2 with value: 10 at time: 5
+write to site: 6 data: 2 with value: 10 at time: 5
+write to site: 7 data: 2 with value: 10 at time: 5
+write to site: 8 data: 2 with value: 10 at time: 5
+write to site: 9 data: 2 with value: 10 at time: 5
+write to site: 10 data: 2 with value: 10 at time: 5
+instruction is: end(T2) at time: 7
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+transaction: 2 has a lock on data: 2 on site: 2
+found a match: 2 for data: 2 int site: 2
+transaction: 2 has a lock on data: 2 on site: 3
+found a match: 2 for data: 2 int site: 3
+transaction: 2 has a lock on data: 2 on site: 4
+found a match: 2 for data: 2 int site: 4
+transaction: 2 has a lock on data: 2 on site: 5
+found a match: 2 for data: 2 int site: 5
+transaction: 2 has a lock on data: 2 on site: 6
+found a match: 2 for data: 2 int site: 6
+transaction: 2 has a lock on data: 2 on site: 7
+found a match: 2 for data: 2 int site: 7
+transaction: 2 has a lock on data: 2 on site: 8
+found a match: 2 for data: 2 int site: 8
+transaction: 2 has a lock on data: 2 on site: 9
+found a match: 2 for data: 2 int site: 9
+transaction: 2 has a lock on data: 2 on site: 10
+found a match: 2 for data: 2 int site: 10
+Finish reading input file

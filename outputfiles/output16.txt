@@ -1,0 +1,42 @@
+
+This is test 17
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: begin(T3) at time: 3
+instruction is: W(T1,x1,101)  at time: 4
+instruction is: R(T2,x2) at time: 5
+x2:90
+instruction is: W(T1,x2,102)  at time: 6
+lock conflict, need to wait 
+checking TID: 1 has 1 neighbors 
+checking TID: 2 has 0 neighbors 
+instruction is: R(T3,x2) at time: 7
+x2:90
+instruction is: end(T2) at time: 8
+transaction: 2 was committed 
+go into waiting queue: 1
+aborted id: 2
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+transaction: 3 has a lock on data: 2 on site: 1
+add subtransaction from waiting queue into active queue: W 1 2
+instruction is: W 1 2
+lock conflict, need to wait 
+checking TID: 1 has 1 neighbors 
+checking TID: 3 has 0 neighbors 
+instruction is: end(T3) at time: 9
+transaction: 3 was committed 
+go into waiting queue: 1
+aborted id: 3
+transaction: 3 has a lock on data: 2 on site: 1
+found a match: 3 for data: 2 int site: 1
+add subtransaction from waiting queue into active queue: W 1 2
+instruction is: W 1 2
+write to site: 1 data: 2 with value: 102 at time: 6
+instruction is: end(T1) at time: 10
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+transaction: 1 has a lock on data: 2 on site: 1
+found a match: 1 for data: 2 int site: 1
+Finish reading input file

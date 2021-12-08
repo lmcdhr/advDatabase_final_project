@@ -1,0 +1,28 @@
+
+This is test 15
+instruction is: begin(T1) at time: 1
+instruction is: beginRO(T2) at time: 2
+instruction is: W(T1,x1,101)  at time: 3
+instruction is: R(T2,x2) at time: 4
+x2:90
+instruction is: W(T1,x2,102)  at time: 5
+lock conflict, need to wait 
+checking TID: 1 has 1 neighbors 
+checking TID: 2 has 0 neighbors 
+instruction is: R(T2,x1) at time: 6
+can not find a valid site, add to read waiting site queue
+instruction is: end(T1)  at time: 7
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+transaction: 2 has a lock on data: 2 on site: 1
+transaction: 2 has a lock on data: 2 on site: 1
+instruction is: end(T2) at time: 8
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+Finish reading input file

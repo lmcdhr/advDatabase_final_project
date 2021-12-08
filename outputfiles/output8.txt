@@ -1,0 +1,90 @@
+
+This is test 9
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: begin(T3) at time: 3
+instruction is: begin(T4) at time: 4
+instruction is: begin(T5) at time: 5
+instruction is: R(T3,x3) at time: 6
+can not find a valid site, add to read waiting site queue
+instruction is: R(T4,x4) at time: 7
+x4:30
+instruction is: R(T5,x5) at time: 8
+can not find a valid site, add to read waiting site queue
+instruction is: R(T1,x1) at time: 9
+can not find a valid site, add to read waiting site queue
+instruction is: R(T2,x2) at time: 10
+x2:90
+instruction is: W(T1,x2,10) at time: 11
+lock conflict, need to wait 
+checking TID: 1 has 1 neighbors 
+checking TID: 2 has 0 neighbors 
+added: 3 3
+added: 5 5
+added: 1 1
+instruction is: R 3 3
+can not find a valid site, add to read waiting site queue
+instruction is: R 5 5
+can not find a valid site, add to read waiting site queue
+instruction is: R 1 1
+transaction is waiting, will not read
+instruction is: W(T2,x3,20) at time: 12
+added: 3 3
+added: 5 5
+instruction is: R 3 3
+can not find a valid site, add to read waiting site queue
+instruction is: R 5 5
+can not find a valid site, add to read waiting site queue
+instruction is: W(T3,x4,30) at time: 13
+lock conflict, need to wait 
+checking TID: 3 has 1 neighbors 
+checking TID: 4 has 0 neighbors 
+added: 3 3
+added: 5 5
+instruction is: R 3 3
+transaction is waiting, will not read
+instruction is: R 5 5
+can not find a valid site, add to read waiting site queue
+instruction is: W(T4,x5,40) at time: 14
+added: 5 5
+instruction is: R 5 5
+can not find a valid site, add to read waiting site queue
+instruction is: W(T5,x1,50) at time: 15
+added: 5 5
+instruction is: R 5 5
+can not find a valid site, add to read waiting site queue
+instruction is: end(T5) at time: 16
+transaction: 5 was committed 
+go into waiting queue: 4
+aborted id: 5
+transaction: 2 has a lock on data: 2 on site: 1
+transaction: 4 has a lock on data: 4 on site: 1
+instruction is: end(T4) at time: 17
+transaction: 4 was committed 
+go into waiting queue: 4
+aborted id: 4
+transaction: 2 has a lock on data: 2 on site: 1
+transaction: 4 has a lock on data: 4 on site: 1
+found a match: 4 for data: 4 int site: 1
+add subtransaction from waiting queue into active queue: W 3 4
+instruction is: W 3 4
+transaction is waiting, will not read
+instruction is: end(T3) at time: 18
+transaction: 3 was committed 
+go into waiting queue: 2
+aborted id: 3
+transaction: 2 has a lock on data: 2 on site: 1
+instruction is: end(T2) at time: 19
+transaction: 2 was committed 
+go into waiting queue: 2
+aborted id: 2
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+add subtransaction from waiting queue into active queue: W 1 2
+instruction is: W 1 2
+transaction is waiting, will not read
+instruction is: end(T1) at time: 20
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+Finish reading input file

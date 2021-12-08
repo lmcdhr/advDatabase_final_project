@@ -1,0 +1,36 @@
+
+This is test 18
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: R(T1,x3) at time: 3
+can not find a valid site, add to read waiting site queue
+instruction is: fail(2) at time: 4
+instruction is: W(T2,x8,88)  at time: 5
+write to site: 1 data: 8 with value: 88 at time: 5
+added: 1 3
+instruction is: R 1 3
+can not find a valid site, add to read waiting site queue
+instruction is: R(T2,x3) at time: 6
+can not find a valid site, add to read waiting site queue
+instruction is: W(T1,x5,91) at time: 7
+added: 1 3
+added: 2 3
+instruction is: R 1 3
+can not find a valid site, add to read waiting site queue
+instruction is: R 2 3
+can not find a valid site, add to read waiting site queue
+instruction is: end(T2) at time: 8
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+transaction: 2 has a lock on data: 8 on site: 1
+found a match: 2 for data: 8 int site: 1
+instruction is: recover(2) at time: 9
+added: 1 3
+instruction is: R 1 3
+can not find a valid site, add to read waiting site queue
+instruction is: end(T1) at time: 10
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+Finish reading input file

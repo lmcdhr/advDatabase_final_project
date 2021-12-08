@@ -1,0 +1,23 @@
+
+This is test 21
+instruction is: begin(T1) at time: 1
+instruction is: beginRO(T2) at time: 2
+instruction is: R(T2,x1) at time: 3
+x1:10
+instruction is: R(T2,x2) at time: 4
+x2:20
+instruction is: W(T1,x3,33) at time: 5
+write to site: 4 data: 3 with value: 33 at time: 5
+instruction is: end(T1) at time: 6
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+transaction: 1 has a lock on data: 3 on site: 4
+found a match: 1 for data: 3 int site: 4
+instruction is: R(T2,x3) at time: 7
+x3:30
+instruction is: end(T2) at time: 8
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+Finish reading input file

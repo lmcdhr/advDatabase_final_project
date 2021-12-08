@@ -1,0 +1,34 @@
+
+This is test 20
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: fail(3)  at time: 3
+instruction is: fail(4) at time: 4
+instruction is: R(T1,x1) at time: 5
+x1:10
+instruction is: W(T2,x8,88) at time: 6
+write to site: 1 data: 8 with value: 88 at time: 6
+write to site: 2 data: 8 with value: 88 at time: 6
+instruction is: end(T1) at time: 7
+transaction: 1 was committed 
+go into waiting queue: 0
+aborted id: 1
+transaction: 2 has a lock on data: 8 on site: 1
+transaction: 1 has a lock on data: 1 on site: 2
+found a match: 1 for data: 1 int site: 2
+transaction: 2 has a lock on data: 8 on site: 2
+instruction is: recover(4)  at time: 8
+instruction is: recover(3) at time: 9
+instruction is: R(T2,x3) at time: 10
+x3:20
+instruction is: end(T2) at time: 11
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+transaction: 2 has a lock on data: 8 on site: 1
+found a match: 2 for data: 8 int site: 1
+transaction: 2 has a lock on data: 8 on site: 2
+found a match: 2 for data: 8 int site: 2
+transaction: 2 has a lock on data: 3 on site: 4
+found a match: 2 for data: 3 int site: 4
+Finish reading input file

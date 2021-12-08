@@ -1,0 +1,199 @@
+
+This is test 4
+instruction is: begin(T5) at time: 1
+instruction is: begin(T4) at time: 2
+instruction is: begin(T3) at time: 3
+instruction is: begin(T2) at time: 4
+instruction is: begin(T1) at time: 5
+instruction is: W(T1,x4,5) at time: 6
+write to site: 1 data: 4 with value: 5 at time: 6
+write to site: 2 data: 4 with value: 5 at time: 6
+write to site: 3 data: 4 with value: 5 at time: 6
+write to site: 4 data: 4 with value: 5 at time: 6
+write to site: 5 data: 4 with value: 5 at time: 6
+write to site: 6 data: 4 with value: 5 at time: 6
+write to site: 7 data: 4 with value: 5 at time: 6
+write to site: 8 data: 4 with value: 5 at time: 6
+write to site: 9 data: 4 with value: 5 at time: 6
+write to site: 10 data: 4 with value: 5 at time: 6
+instruction is: fail(2) at time: 7
+transaction: 1 is aborted due to the fail of site: 2
+go into waiting queue: 0
+aborted id: 1
+transaction: 1 has a lock on data: 4 on site: 1
+found a match: 1 for data: 4 int site: 1
+transaction: 1 has a lock on data: 4 on site: 3
+found a match: 1 for data: 4 int site: 3
+transaction: 1 has a lock on data: 4 on site: 4
+found a match: 1 for data: 4 int site: 4
+transaction: 1 has a lock on data: 4 on site: 5
+found a match: 1 for data: 4 int site: 5
+transaction: 1 has a lock on data: 4 on site: 6
+found a match: 1 for data: 4 int site: 6
+transaction: 1 has a lock on data: 4 on site: 7
+found a match: 1 for data: 4 int site: 7
+transaction: 1 has a lock on data: 4 on site: 8
+found a match: 1 for data: 4 int site: 8
+transaction: 1 has a lock on data: 4 on site: 9
+found a match: 1 for data: 4 int site: 9
+transaction: 1 has a lock on data: 4 on site: 10
+found a match: 1 for data: 4 int site: 10
+instruction is: W(T2,x4,44) at time: 8
+write to site: 1 data: 4 with value: 44 at time: 8
+write to site: 3 data: 4 with value: 44 at time: 8
+write to site: 4 data: 4 with value: 44 at time: 8
+write to site: 5 data: 4 with value: 44 at time: 8
+write to site: 6 data: 4 with value: 44 at time: 8
+write to site: 7 data: 4 with value: 44 at time: 8
+write to site: 8 data: 4 with value: 44 at time: 8
+write to site: 9 data: 4 with value: 44 at time: 8
+write to site: 10 data: 4 with value: 44 at time: 8
+instruction is: recover(2) at time: 9
+instruction is: W(T3,x4,55) at time: 10
+lock conflict, need to wait 
+checking TID: 3 has 1 neighbors 
+checking TID: 2 has 0 neighbors 
+instruction is: W(T4,x4,66) at time: 11
+lock conflict, need to wait 
+checking TID: 4 has 1 neighbors 
+checking TID: 3 has 1 neighbors 
+checking TID: 2 has 0 neighbors 
+instruction is: W(T5,x4,77) at time: 12
+lock conflict, need to wait 
+checking TID: 5 has 1 neighbors 
+checking TID: 4 has 1 neighbors 
+checking TID: 3 has 1 neighbors 
+checking TID: 2 has 0 neighbors 
+instruction is: end(T1) at time: 13
+transaction: 1 was aborted 
+instruction is: end(T2) at time: 14
+transaction: 2 was committed 
+go into waiting queue: 3
+aborted id: 2
+transaction: 2 has a lock on data: 4 on site: 1
+found a match: 2 for data: 4 int site: 1
+transaction: 2 has a lock on data: 4 on site: 3
+found a match: 2 for data: 4 int site: 3
+transaction: 2 has a lock on data: 4 on site: 4
+found a match: 2 for data: 4 int site: 4
+transaction: 2 has a lock on data: 4 on site: 5
+found a match: 2 for data: 4 int site: 5
+transaction: 2 has a lock on data: 4 on site: 6
+found a match: 2 for data: 4 int site: 6
+transaction: 2 has a lock on data: 4 on site: 7
+found a match: 2 for data: 4 int site: 7
+transaction: 2 has a lock on data: 4 on site: 8
+found a match: 2 for data: 4 int site: 8
+transaction: 2 has a lock on data: 4 on site: 9
+found a match: 2 for data: 4 int site: 9
+transaction: 2 has a lock on data: 4 on site: 10
+found a match: 2 for data: 4 int site: 10
+add subtransaction from waiting queue into active queue: W 3 4
+instruction is: W 3 4
+write to site: 1 data: 4 with value: 55 at time: 10
+write to site: 2 data: 4 with value: 55 at time: 10
+write to site: 3 data: 4 with value: 55 at time: 10
+write to site: 4 data: 4 with value: 55 at time: 10
+write to site: 5 data: 4 with value: 55 at time: 10
+write to site: 6 data: 4 with value: 55 at time: 10
+write to site: 7 data: 4 with value: 55 at time: 10
+write to site: 8 data: 4 with value: 55 at time: 10
+write to site: 9 data: 4 with value: 55 at time: 10
+write to site: 10 data: 4 with value: 55 at time: 10
+instruction is: end(T3) at time: 15
+transaction: 3 was committed 
+go into waiting queue: 2
+aborted id: 3
+transaction: 3 has a lock on data: 4 on site: 1
+found a match: 3 for data: 4 int site: 1
+transaction: 3 has a lock on data: 4 on site: 2
+found a match: 3 for data: 4 int site: 2
+transaction: 3 has a lock on data: 4 on site: 3
+found a match: 3 for data: 4 int site: 3
+transaction: 3 has a lock on data: 4 on site: 4
+found a match: 3 for data: 4 int site: 4
+transaction: 3 has a lock on data: 4 on site: 5
+found a match: 3 for data: 4 int site: 5
+transaction: 3 has a lock on data: 4 on site: 6
+found a match: 3 for data: 4 int site: 6
+transaction: 3 has a lock on data: 4 on site: 7
+found a match: 3 for data: 4 int site: 7
+transaction: 3 has a lock on data: 4 on site: 8
+found a match: 3 for data: 4 int site: 8
+transaction: 3 has a lock on data: 4 on site: 9
+found a match: 3 for data: 4 int site: 9
+transaction: 3 has a lock on data: 4 on site: 10
+found a match: 3 for data: 4 int site: 10
+add subtransaction from waiting queue into active queue: W 4 4
+instruction is: W 4 4
+write to site: 1 data: 4 with value: 66 at time: 11
+write to site: 2 data: 4 with value: 66 at time: 11
+write to site: 3 data: 4 with value: 66 at time: 11
+write to site: 4 data: 4 with value: 66 at time: 11
+write to site: 5 data: 4 with value: 66 at time: 11
+write to site: 6 data: 4 with value: 66 at time: 11
+write to site: 7 data: 4 with value: 66 at time: 11
+write to site: 8 data: 4 with value: 66 at time: 11
+write to site: 9 data: 4 with value: 66 at time: 11
+write to site: 10 data: 4 with value: 66 at time: 11
+instruction is: end(T4) at time: 16
+transaction: 4 was committed 
+go into waiting queue: 1
+aborted id: 4
+transaction: 4 has a lock on data: 4 on site: 1
+found a match: 4 for data: 4 int site: 1
+transaction: 4 has a lock on data: 4 on site: 2
+found a match: 4 for data: 4 int site: 2
+transaction: 4 has a lock on data: 4 on site: 3
+found a match: 4 for data: 4 int site: 3
+transaction: 4 has a lock on data: 4 on site: 4
+found a match: 4 for data: 4 int site: 4
+transaction: 4 has a lock on data: 4 on site: 5
+found a match: 4 for data: 4 int site: 5
+transaction: 4 has a lock on data: 4 on site: 6
+found a match: 4 for data: 4 int site: 6
+transaction: 4 has a lock on data: 4 on site: 7
+found a match: 4 for data: 4 int site: 7
+transaction: 4 has a lock on data: 4 on site: 8
+found a match: 4 for data: 4 int site: 8
+transaction: 4 has a lock on data: 4 on site: 9
+found a match: 4 for data: 4 int site: 9
+transaction: 4 has a lock on data: 4 on site: 10
+found a match: 4 for data: 4 int site: 10
+add subtransaction from waiting queue into active queue: W 5 4
+instruction is: W 5 4
+write to site: 1 data: 4 with value: 77 at time: 12
+write to site: 2 data: 4 with value: 77 at time: 12
+write to site: 3 data: 4 with value: 77 at time: 12
+write to site: 4 data: 4 with value: 77 at time: 12
+write to site: 5 data: 4 with value: 77 at time: 12
+write to site: 6 data: 4 with value: 77 at time: 12
+write to site: 7 data: 4 with value: 77 at time: 12
+write to site: 8 data: 4 with value: 77 at time: 12
+write to site: 9 data: 4 with value: 77 at time: 12
+write to site: 10 data: 4 with value: 77 at time: 12
+instruction is: end(T5) at time: 17
+transaction: 5 was committed 
+go into waiting queue: 0
+aborted id: 5
+transaction: 5 has a lock on data: 4 on site: 1
+found a match: 5 for data: 4 int site: 1
+transaction: 5 has a lock on data: 4 on site: 2
+found a match: 5 for data: 4 int site: 2
+transaction: 5 has a lock on data: 4 on site: 3
+found a match: 5 for data: 4 int site: 3
+transaction: 5 has a lock on data: 4 on site: 4
+found a match: 5 for data: 4 int site: 4
+transaction: 5 has a lock on data: 4 on site: 5
+found a match: 5 for data: 4 int site: 5
+transaction: 5 has a lock on data: 4 on site: 6
+found a match: 5 for data: 4 int site: 6
+transaction: 5 has a lock on data: 4 on site: 7
+found a match: 5 for data: 4 int site: 7
+transaction: 5 has a lock on data: 4 on site: 8
+found a match: 5 for data: 4 int site: 8
+transaction: 5 has a lock on data: 4 on site: 9
+found a match: 5 for data: 4 int site: 9
+transaction: 5 has a lock on data: 4 on site: 10
+found a match: 5 for data: 4 int site: 10
+Finish reading input file

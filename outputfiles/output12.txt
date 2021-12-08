@@ -1,0 +1,60 @@
+
+This is test 13
+instruction is: begin(T1) at time: 1
+instruction is: begin(T2) at time: 2
+instruction is: W(T1,x2,9) at time: 3
+write to site: 1 data: 2 with value: 9 at time: 3
+write to site: 4 data: 2 with value: 9 at time: 3
+instruction is: fail(1)  at time: 4
+transaction: 1 is aborted due to the fail of site: 1
+go into waiting queue: 0
+aborted id: 1
+transaction: 1 has a lock on data: 2 on site: 4
+found a match: 1 for data: 2 int site: 4
+instruction is: end(T1) at time: 5
+transaction: 1 was aborted 
+instruction is: begin(T3) at time: 6
+instruction is: W(T3,x2,100) at time: 7
+write to site: 4 data: 2 with value: 100 at time: 7
+instruction is: end(T3) at time: 8
+transaction: 3 was committed 
+go into waiting queue: 0
+aborted id: 3
+transaction: 3 has a lock on data: 2 on site: 4
+found a match: 3 for data: 2 int site: 4
+instruction is: recover(1) at time: 9
+instruction is: fail(2) at time: 10
+instruction is: fail(3) at time: 11
+instruction is: fail(4) at time: 12
+instruction is: fail(5) at time: 13
+instruction is: fail(6) at time: 14
+instruction is: fail(7) at time: 15
+instruction is: fail(8) at time: 16
+instruction is: fail(9) at time: 17
+instruction is: fail(10) at time: 18
+instruction is: R(T2,x2) at time: 19
+can not find a valid site, add to read waiting site queue
+instruction is: begin(T5) at time: 20
+instruction is: W(T5,x2,90)  at time: 21
+write to site: 1 data: 2 with value: 90 at time: 21
+added: 2 2
+instruction is: R 2 2
+need to wait since there is lock on site: 1
+checking TID: 2 has 1 neighbors 
+checking TID: 5 has 0 neighbors 
+instruction is: end(T5) at time: 22
+transaction: 5 was committed 
+go into waiting queue: 1
+aborted id: 5
+transaction: 5 has a lock on data: 2 on site: 1
+found a match: 5 for data: 2 int site: 1
+add subtransaction from waiting queue into active queue: R 2 2
+instruction is: R 2 2
+x2:90
+instruction is: end(T2)  at time: 23
+transaction: 2 was committed 
+go into waiting queue: 0
+aborted id: 2
+transaction: 2 has a lock on data: 2 on site: 1
+found a match: 2 for data: 2 int site: 1
+Finish reading input file
